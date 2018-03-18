@@ -1,0 +1,17 @@
+server:
+  port: 8765
+url:
+  api:
+    routes: https://api.ryanair.com/core/3/routes
+    schedules: https://api.ryanair.com/timetable/3/schedules
+swagger2:
+  title: "Ryanair - Task 2 - Java/Spring - Interconnecting Flights"
+  description: "A Spring MVC based RESTful API application which serves information about possible direct and interconnected flights (maximum 1 stop) based on the data consumed from external APIs."
+  author:
+    name: "Iván Mauricio Montilla Figueroa"
+    web: "https://immontilla.eu"
+    email: "mauriciomontilla@gmail.com"
+spring:
+  cache:
+    ehcache:
+      config: classpath:ehcache.xml
