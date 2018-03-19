@@ -16,6 +16,8 @@ which returns a list of available flights for a given departure airport IATA cod
 
 I've built the solution, using a Spring Boot 2.0 project. I've added a Cache manager to save the Route API response. Also, I've documented the API using Swagger.
 
+The port where the web server will be listening on can be customized in the file src/main/resources/application.yml
+
 To build and run the project. Run this command:
 
 ```
