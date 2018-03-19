@@ -22,7 +22,12 @@ To build and run the project. Run this command:
 mvn clean package spring-boot:run
 ```
 
-**Remember** to escape the **:** character with **%3A**.
+To read the API documentation, open a web browser at http://localhost:8765/swagger-ui.html.
+
+To use the API, you can:
+- Open a web browser at http://localhost:8765/swagger-ui.html#/main-controller/flightResultsUsingGET and click on "Try it out".
+- Use curl.
+**Remember** to escape the **:** character with **%3A** on **departureDateTime** and **arrivalDateTime parameters**.
 
 ```
 curl -i -X GET "http://localhost:8765/api/interconnections?departure=DUB&arrival=BCN&departureDateTime=2018-06-01T06%3A15&arrivalDateTime=2018-06-15T21%3A15" -H  "accept: application/json" && echo ''
