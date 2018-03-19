@@ -32,3 +32,4 @@ To use the API, you can:
 ```
 curl -i -X GET "http://localhost:8765/api/interconnections?departure=DUB&arrival=BCN&departureDateTime=2018-06-01T06%3A15&arrivalDateTime=2018-06-15T21%3A15" -H  "accept: application/json" && echo ''
 ```
+
