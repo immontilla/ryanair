@@ -6,10 +6,11 @@ import java.util.Collection;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Represent a list of avalaible flights on a day - Schedules API
+ * 
  * @author immontilla
- *
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DayFlight implements Serializable {
@@ -39,6 +40,16 @@ public class DayFlight implements Serializable {
 
     public void setFlights(Collection<Flight> flights) {
         this.flights = flights;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("DayFlight [day=").append(day).append(", ");
+        if (flights != null)
+            builder.append("flights=").append(flights);
+        builder.append("]");
+        return builder.toString();
     }
 
 }

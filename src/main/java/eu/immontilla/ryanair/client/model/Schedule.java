@@ -42,4 +42,14 @@ public class Schedule implements Serializable {
         this.days = days;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[month=").append(month).append(", ");
+        if (days != null)
+            builder.append("days=").append(days);
+        builder.append("]");
+        return builder.toString();
+    }
+
 }

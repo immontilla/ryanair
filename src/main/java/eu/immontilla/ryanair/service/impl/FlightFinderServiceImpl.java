@@ -1,17 +1,19 @@
 package eu.immontilla.ryanair.service.impl;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.google.common.base.Joiner;
 
 import eu.immontilla.ryanair.client.model.DayFlight;
 import eu.immontilla.ryanair.client.model.Flight;
@@ -56,6 +58,8 @@ public class FlightFinderServiceImpl implements FlightFinderService {
         List<FlightResult> flightResults = getAvailablesFlights(routes, departure, arrival, departureDateTime,
                 arrivalDateTime);
 
+        LOGGER.info(String.format("Flight results: %s", Joiner.on(" + ").join(flightResults)));
+
         return flightResults;
     }
 
@@ -72,22 +76,18 @@ public class FlightFinderServiceImpl implements FlightFinderService {
     private List<FlightResult> getAvailablesFlights(List<Route> routes, String departure, String arrival,
             LocalDateTime departureDateTime, LocalDateTime arrivalDateTime) {
 
-        Collection<Flight> flightsAvailables = Collections.emptyList();
+        List<FlightResult> flightsAvailables = Collections.emptyList();
 
         boolean routeAvailable = getDirectRouteAvailable(routes, departure, arrival);
 
         if (routeAvailable) {
             LOGGER.info(String.format("Direct route between %s and %s available!", departure, arrival));
-            flightsAvailables = getFlightsAvailables(departure, arrival, departureDateTime);
+            flightsAvailables = getFlightsAvailables(departure, arrival, departureDateTime, arrivalDateTime);
         } else {
             LOGGER.info(String.format("No direct route between %s and %s has been found.", departure, arrival));
         }
 
-        if (!flightsAvailables.isEmpty()) {
-            return getFlightResults(flightsAvailables, departure, arrival, departureDateTime);
-        }
-
-        return Collections.emptyList();
+        return flightsAvailables;
     }
 
     /**
@@ -121,118 +121,134 @@ public class FlightFinderServiceImpl implements FlightFinderService {
      * @param dateTime
      * @return
      */
-    private Collection<Flight> getFlightsAvailables(String from, String to, LocalDateTime dateTime) {
-        Schedule schedule = scheduleFinderService.get(from, to, dateTime);
-        if (schedule != null) {
-            return getFlightsOnSchedule(schedule, from, to, dateTime);
+    private List<FlightResult> getFlightsAvailables(String from, String to, LocalDateTime startDateTime,
+            LocalDateTime endDateTime) {
+        List<FlightResult> flightsAvailables = new ArrayList<FlightResult>();
+        int day = 0;
+        int month = 0;
+        int year = startDateTime.getYear();
+        LocalDateTime departureDateTime, arrivalDateTime;
+        FlightResult flightResult;
+        List<Schedule> schedules = getSchedules(from, to, startDateTime, endDateTime);
+        if (!schedules.isEmpty()) {
+            LOGGER.info(String.format("Scheduled flights: %s", Joiner.on(" + ").join(schedules)));
+            for (Schedule schedule : schedules) {
+                month = schedule.getMonth();
+                for (DayFlight dayFlight : schedule.getDays()) {
+                    day = dayFlight.getDay();
+                    for (Flight flight : dayFlight.getFlights()) {
+                        departureDateTime = createLocalDateTime(year, month, day, flight.getDepartureTime());
+                        arrivalDateTime = createLocalDateTime(year, month, day, flight.getArrivalTime());
+                        if (validFlight(startDateTime, endDateTime, departureDateTime, arrivalDateTime)) {
+                            flightResult = createFlightResult(from, to, departureDateTime, arrivalDateTime);
+                            flightsAvailables.add(flightResult);
+                        }
+                    }
+                }
+            }
         }
-        return Collections.emptyList();
+        return flightsAvailables;
     }
 
     /**
-     * Condition to look for flights on a specific date
+     * Return a LocalDateTime
      * 
-     * @param dateTime
+     * @param year
+     * @param month
+     * @param day
+     * @param time
      * @return
      */
-    private Predicate<Flight> fligthsOnDateTime(LocalDateTime dateTime) {
-        return p -> p.getDepartureTime().equalsIgnoreCase(dateTime.toString());
+    private LocalDateTime createLocalDateTime(int year, int month, int day, String time) {
+        int hour = Integer.valueOf(time.split(":")[0]);
+        int minute = Integer.valueOf(time.split(":")[1]);
+        return LocalDateTime.of(year, month, day, hour, minute);
     }
 
     /**
-     * List of scheduled flights on a specific date
+     * Check if this is a valid flight
      * 
-     * @param schedule
+     * @param startDateTime
+     * @param endDateTime
+     * @param departureDateTime
+     * @param arrivalDateTime
+     * @return
+     */
+    private boolean validFlight(LocalDateTime startDateTime, LocalDateTime endDateTime, LocalDateTime departureDateTime,
+            LocalDateTime arrivalDateTime) {
+        if (departureDateTime.isBefore(startDateTime)) {
+            return false;
+        }
+        if (arrivalDateTime.isAfter(endDateTime)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Create a flight result
+     * 
      * @param from
      * @param to
-     * @param dateTime
+     * @param departureDateTime
+     * @param arrivalDateTime
      * @return
      */
-    private Collection<Flight> getFlightsOnSchedule(Schedule schedule, String from, String to, LocalDateTime dateTime) {
-
-        Collection<Flight> availablesFlights = getAvailablesFlights(schedule, dateTime);
-        LOGGER.info(String.format("availablesFlights: %s", availablesFlights.toString()));
-
-        Collection<Flight> flightsOnSchedule = availablesFlights.stream().filter(fligthsOnDateTime(dateTime))
-                .collect(Collectors.toList());
-        LOGGER.info(String.format("flightsOnSchedule: %s", flightsOnSchedule.toString()));
-
-        return flightsOnSchedule;
-    }
-    
-    /**
-     * Condition to get scheduled flights on a day
-     * @param day
-     * @return
-     */
-    private Predicate<DayFlight> flightsOnDay(int day) {
-        return p -> (p.getDay() == day);
-    }
-    
-    /**
-     * List of avalaibles flights on a specific date
-     * @param schedule
-     * @param dateTime
-     * @return
-     */
-    private Collection<Flight> getAvailablesFlights(Schedule schedule, LocalDateTime dateTime) {
-        int day = dateTime.getDayOfMonth();
-
-        Collection<Flight> flights = schedule.getDays().stream().filter(flightsOnDay(day)).collect(Collectors.toList())
-                .get(0).getFlights();
-
-        Collection<Flight> result = flights.stream().map(temp -> {
-            Flight obj = new Flight();
-            obj.setNumber(temp.getNumber());
-            obj.setDepartureTime(getFullDateTime(dateTime, temp.getDepartureTime()));
-            obj.setArrivalTime(getFullDateTime(dateTime, temp.getArrivalTime()));
-            return obj;
-        }).collect(Collectors.toList());
-        return result;
-    }
-
-    /**
-     * Date time transformation
-     * 
-     * @param dateTime
-     * @param hourMinute
-     * @return
-     */
-    private String getFullDateTime(LocalDateTime dateTime, String hourMinute) {
-        int year = dateTime.getYear();
-        int month = dateTime.getMonthValue();
-        int day = dateTime.getDayOfMonth();
-        int hour = Integer.valueOf(hourMinute.split(":")[0]);
-        int minute = Integer.valueOf(hourMinute.split(":")[1]);
-        return LocalDateTime.of(year, month, day, hour, minute, 0).toString();
-    }
-
-    /**
-     * Avalaibles flights mapped as a list of FlightResult
-     * 
-     * @param flights
-     * @param departure
-     * @param arrival
-     * @param dateTime
-     * @return
-     */
-    private List<FlightResult> getFlightResults(Collection<Flight> flights, String departure, String arrival,
-            LocalDateTime dateTime) {
-        List<FlightResult> flightResults = new ArrayList<FlightResult>();
+    private FlightResult createFlightResult(String from, String to, LocalDateTime departureDateTime,
+            LocalDateTime arrivalDateTime) {
         FlightResult flightResult = new FlightResult();
         flightResult.setStops(0);
-        Leg leg = new Leg();
-        for (Flight flight : flights) {
-            leg.setDepartureAirport(departure);
-            leg.setArrivalAirport(arrival);
-            leg.setDepartureDateTime(flight.getDepartureTime());
-            leg.setArrivalDateTime(flight.getArrivalTime());
-        }
         List<Leg> legs = new ArrayList<Leg>();
-        legs.add(leg);
+        legs.add(new Leg(from, to, departureDateTime.toString(), arrivalDateTime.toString()));
         flightResult.setLegs(legs);
-        flightResults.add(flightResult);
-        return flightResults;
+        return flightResult;
+    }
+
+    /**
+     * Scheduled flights list
+     * 
+     * @param from
+     * @param to
+     * @param startDateTime
+     * @param endDateTime
+     * @return
+     */
+    private List<Schedule> getSchedules(String from, String to, LocalDateTime startDateTime,
+            LocalDateTime endDateTime) {
+        List<Schedule> schedules = new ArrayList<Schedule>();
+        Schedule schedule = null;
+        int startYear = startDateTime.getYear();
+        int startMonth = startDateTime.getMonthValue();
+        int endYear = endDateTime.getYear();
+        int endMonth = endDateTime.getMonthValue();
+        int month = startMonth;
+        int year = startYear;
+        if (endYear > startYear) {
+            LocalDate endDate = LocalDate.of(endYear, Month.of(endMonth), endDateTime.getDayOfMonth()), date;
+            while ((year <= endYear)) {
+                schedule = scheduleFinderService.get(from, to, month, year);
+                if (schedule != null) {
+                    schedules.add(schedule);
+                }
+                month++;
+                if (month > 12) {
+                    month = 1;
+                    year++;
+                }
+                date = LocalDate.of(year, Month.of(month), endDateTime.getDayOfMonth());
+                if (date.isAfter(endDate)) {
+                    break;
+                }
+            }
+        } else {
+            for (month = startMonth; month <= endMonth; month++) {
+                schedule = scheduleFinderService.get(from, to, month, startYear);
+                if (schedule != null) {
+                    schedules.add(schedule);
+                }
+            }
+        }
+        return schedules;
     }
 
 }

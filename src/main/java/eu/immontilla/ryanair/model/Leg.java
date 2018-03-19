@@ -2,10 +2,11 @@ package eu.immontilla.ryanair.model;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 /**
  * Part of flight result.
+ * 
  * @author immontilla
- *
  */
 @ApiModel
 public class Leg {
@@ -60,6 +61,22 @@ public class Leg {
 
     public void setArrivalDateTime(String arrivalDateTime) {
         this.arrivalDateTime = arrivalDateTime;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Leg [");
+        if (departureAirport != null)
+            builder.append("departureAirport=").append(departureAirport).append(", ");
+        if (arrivalAirport != null)
+            builder.append("arrivalAirport=").append(arrivalAirport).append(", ");
+        if (departureDateTime != null)
+            builder.append("departureDateTime=").append(departureDateTime).append(", ");
+        if (arrivalDateTime != null)
+            builder.append("arrivalDateTime=").append(arrivalDateTime);
+        builder.append("]");
+        return builder.toString();
     }
 
 }

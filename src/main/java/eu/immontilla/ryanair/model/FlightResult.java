@@ -4,10 +4,11 @@ import java.util.List;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+
 /**
  * Represent a flight result
+ * 
  * @author immontilla
- *
  */
 @ApiModel
 public class FlightResult {
@@ -40,6 +41,16 @@ public class FlightResult {
 
     public void setLegs(List<Leg> legs) {
         this.legs = legs;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("[stops=").append(stops).append(", ");
+        if (legs != null)
+            builder.append("legs=").append(legs);
+        builder.append("]");
+        return builder.toString();
     }
 
 }
