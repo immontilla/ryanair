@@ -16,6 +16,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import com.google.common.base.Strings;
@@ -37,7 +38,16 @@ public class AvailableRouteServiceImpl implements AvailableRouteService {
         URI uri = null;
         try {
             uri = new URI(urlApiRoutes);
-            RestTemplate restTemplate = new RestTemplate();
+            return getRoutes(uri);
+        } catch (URISyntaxException e) {
+            LOGGER.error(String.format("URISyntaxException: %s", e.getMessage()));
+            return Collections.emptyList();
+        }
+    }
+
+    private List<Route> getRoutes(URI uri) {
+        RestTemplate restTemplate = new RestTemplate();
+        try {
             ResponseEntity<List<Route>> response = restTemplate.exchange(uri, HttpMethod.GET, null,
                     new ParameterizedTypeReference<List<Route>>() {
                     });
@@ -46,11 +56,10 @@ public class AvailableRouteServiceImpl implements AvailableRouteService {
                 Predicate<Route> connectingAirportIsNull = p -> Strings.isNullOrEmpty(p.getConnectingAirport());
                 return response.getBody().stream().filter(connectingAirportIsNull).collect(Collectors.toList());
             }
-            return Collections.emptyList();
-        } catch (URISyntaxException e) {
-            LOGGER.error(String.format("URISyntaxException: %s", e.getMessage()));
-            return Collections.emptyList();
+        } catch (final HttpClientErrorException e) {
+            LOGGER.error(String.format("%s: %s", e.getStatusCode(), e.getResponseBodyAsString()));
         }
+        return Collections.emptyList();
     }
 
 }

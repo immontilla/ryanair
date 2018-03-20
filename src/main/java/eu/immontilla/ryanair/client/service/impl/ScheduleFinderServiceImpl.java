@@ -31,20 +31,25 @@ public class ScheduleFinderServiceImpl implements ScheduleFinderService {
         LOGGER.info(String.format("Looking for flights from %s to %s on %d/%d ...", from, to, month, year));
         try {
             uri = new URI(fullURL.toString());
-            RestTemplate restTemplate = new RestTemplate();
-            try {
-                ResponseEntity<Schedule> response = restTemplate.exchange(uri, HttpMethod.GET, null,
-                        new ParameterizedTypeReference<Schedule>() {
-                        });
-                if (response.getStatusCode().is2xxSuccessful()) {
-                    LOGGER.info(String.format("Flights from %s to %s on %d/%d has been found!", from, to, month, year));
-                    return response.getBody();
-                }
-            } catch (final HttpClientErrorException e) {
-                LOGGER.error(String.format("%s: %s", e.getStatusCode(), e.getResponseBodyAsString()));
-            }
+            return getSchedule(uri, from, to, month, year);
         } catch (URISyntaxException e) {
             LOGGER.error(String.format("URISyntaxException: %s", e.getMessage()));
+        }
+        return null;
+    }
+
+    private Schedule getSchedule(URI uri, String from, String to, int month, int year) {
+        RestTemplate restTemplate = new RestTemplate();
+        try {
+            ResponseEntity<Schedule> response = restTemplate.exchange(uri, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<Schedule>() {
+                    });
+            if (response.getStatusCode().is2xxSuccessful()) {
+                LOGGER.info(String.format("Flights from %s to %s on %d/%d has been found!", from, to, month, year));
+                return response.getBody();
+            }
+        } catch (final HttpClientErrorException e) {
+            LOGGER.error(String.format("%s: %s", e.getStatusCode(), e.getResponseBodyAsString()));
         }
         return null;
     }
