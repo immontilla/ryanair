@@ -94,5 +94,24 @@ public class Route implements Serializable {
     public void setGroup(String group) {
         this.group = group;
     }
-    
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Route [");
+        if (airportFrom != null)
+            builder.append("airportFrom=").append(airportFrom).append(", ");
+        if (airportTo != null)
+            builder.append("airportTo=").append(airportTo).append(", ");
+        if (connectingAirport != null)
+            builder.append("connectingAirport=").append(connectingAirport).append(", ");
+        builder.append("newRoute=").append(newRoute).append(", seasonalRoute=").append(seasonalRoute).append(", ");
+        if (operator != null)
+            builder.append("operator=").append(operator).append(", ");
+        if (group != null)
+            builder.append("group=").append(group);
+        builder.append("]");
+        return builder.toString();
+    }
+
 }
