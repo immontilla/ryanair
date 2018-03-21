@@ -28,7 +28,7 @@ To read the API documentation, open a web browser at http://localhost:8765/swagg
 
 To use the API, you can:
 - Open a web browser at http://localhost:8765/swagger-ui.html#/main-controller/flightResultsUsingGET and click on "Try it out".
-- Opean a terminal and run a *curl* command.
+- Open a terminal and run a *curl* command.
 **Remember** to escape the **:** character with **%3A** on **departureDateTime** and **arrivalDateTime parameters**.
 
 ```
