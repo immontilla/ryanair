@@ -27,10 +27,11 @@ public class ScheduleFinderServiceImpl implements ScheduleFinderService {
     public Schedule get(String from, String to, int month, int year) {
         URI uri = null;
         StringBuilder fullURL = new StringBuilder().append(urlApiSchedule).append("/").append(from).append("/")
-                .append(to).append("/years/").append(year).append("/months/").append(month);
+                .append(to).append("/years/").append(year).append("/months/").append(month);        
         LOGGER.info(String.format("Looking for flights from %s to %s on %d/%d ...", from, to, month, year));
         try {
             uri = new URI(fullURL.toString());
+            LOGGER.info(String.format("URL Request => %s", fullURL.toString()));
             return getSchedule(uri, from, to, month, year);
         } catch (URISyntaxException e) {
             LOGGER.error(String.format("URISyntaxException: %s", e.getMessage()));

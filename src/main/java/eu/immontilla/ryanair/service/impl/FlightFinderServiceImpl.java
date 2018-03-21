@@ -1,15 +1,13 @@
 package eu.immontilla.ryanair.service.impl;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.common.base.Joiner;
 
 import eu.immontilla.ryanair.client.model.Route;
 import eu.immontilla.ryanair.client.model.Stop;
@@ -34,19 +32,6 @@ public class FlightFinderServiceImpl implements FlightFinderService {
     public List<FlightResult> findFlights(String departure, String arrival, LocalDateTime departureDateTime,
             LocalDateTime arrivalDateTime) {
 
-        if (arrivalDateTime.isBefore(departureDateTime)) {
-            return Collections.emptyList();
-        }
-
-        LocalDateTime localDateTime = LocalDateTime.now();
-        if (departureDateTime.isBefore(localDateTime)) {
-            return Collections.emptyList();
-        }
-
-        if (departureDateTime.plusHours(2L).isAfter(arrivalDateTime)) {
-            return Collections.emptyList();
-        }
-
         List<Route> routes = availableRouteService.getAll();
         LOGGER.info(String.format("%d routes has been found!", routes.size()));
 
@@ -55,7 +40,7 @@ public class FlightFinderServiceImpl implements FlightFinderService {
         flightResults
                 .addAll(getNonDirectConnnectionFlights(routes, departure, arrival, departureDateTime, arrivalDateTime));
 
-        LOGGER.info(String.format("Flight results: %s", Joiner.on(" + ").join(flightResults)));
+        LOGGER.info(String.format("%d flights has been found", flightResults.size()));
 
         return flightResults;
     }
@@ -73,7 +58,7 @@ public class FlightFinderServiceImpl implements FlightFinderService {
     private List<FlightResult> getDirectConnnectionFlights(List<Route> routes, String departure, String arrival,
             LocalDateTime departureDateTime, LocalDateTime arrivalDateTime) {
 
-        List<FlightResult> flightsAvailables = Collections.emptyList();
+        List<FlightResult> flightsAvailables = new ArrayList<FlightResult>();
 
         DirectConnections directConnections = DirectConnections.getInstance();
 
@@ -93,7 +78,7 @@ public class FlightFinderServiceImpl implements FlightFinderService {
     private List<FlightResult> getNonDirectConnnectionFlights(List<Route> routes, String departure, String arrival,
             LocalDateTime departureDateTime, LocalDateTime arrivalDateTime) {
 
-        List<FlightResult> flightsAvailables = Collections.emptyList();
+        List<FlightResult> flightsAvailables = new ArrayList<FlightResult>();
 
         NonDirectConnections nonDirectConnections = NonDirectConnections.getInstance();
 
@@ -103,9 +88,9 @@ public class FlightFinderServiceImpl implements FlightFinderService {
             LOGGER.info(String.format("One stop alternative routes between %s and %s availables!", departure, arrival));
             LOGGER.info(nonDirectRoutes.toString());
             flightsAvailables = nonDirectConnections.getFlightsAvailables(scheduleFinderService, nonDirectRoutes,
-                    departure, arrival, departureDateTime, arrivalDateTime);
+                    departureDateTime, arrivalDateTime);
         } else {
-            LOGGER.info(String.format("No one stop alternative route between %s and %s has been found.", departure,
+            LOGGER.info(String.format("No one-stop alternative route between %s and %s has been found.", departure,
                     arrival));
         }
 

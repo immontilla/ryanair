@@ -39,18 +39,38 @@ public class MainController {
 
     @ApiOperation(value = "A list of flights departing from a given departure airport not earlier than the specified departure datetime and arriving to a given arrival airport not later than the specified arrival datetime. For interconnected flights the difference between the arrival and the next departure should be 2h or greater", produces = MediaType.APPLICATION_JSON_VALUE, httpMethod = "GET")
     @ApiResponses(value = { @ApiResponse(code = 200, message = "Success!", response = FlightResult[].class),
+            @ApiResponse(code = 204, message = "No Content"),
             @ApiResponse(code = 400, message = "Bad Request"),
             @ApiResponse(code = 405, message = "Method not allowed") })
     @RequestMapping(value = "/interconnections", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<FlightResult>> flightResults(
-            @ApiParam(value = "A departure airport IATA code like DUB", required = true) @RequestParam("departure") String departure,
-            @ApiParam(value = "An arrival airport IATA code like BCN", required = true) @RequestParam("arrival") String arrival,
-            @ApiParam(value = "A departure datetime in the departure airport timezone in ISO format like 2018-06-01T07:00", required = true) @RequestParam("departureDateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime departureDateTime,
-            @ApiParam(value = "An arrival datetime in the arrival airport timezone in ISO format like 2018-06-02T15:00", required = true) @RequestParam("arrivalDateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime arrivalDateTime) {
+            @ApiParam(value = "A departure airport IATA code like MAD", required = true) @RequestParam("departure") String departure,
+            @ApiParam(value = "An arrival airport IATA code like LIS", required = true) @RequestParam("arrival") String arrival,
+            @ApiParam(value = "A departure datetime in the departure airport timezone in ISO format like 2018-04-01T06:00", required = true) @RequestParam("departureDateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime departureDateTime,
+            @ApiParam(value = "An arrival datetime in the arrival airport timezone in ISO format like 2018-04-04T18:00", required = true) @RequestParam("arrivalDateTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime arrivalDateTime) {
+
+        if (arrivalDateTime.isBefore(departureDateTime)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        if (departureDateTime.isBefore(LocalDateTime.now())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        if (departureDateTime.plusHours(2L).isAfter(arrivalDateTime)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
         LOGGER.info(String.format("Searching flights from %s to %s - Departure %s - Arrival %s", departure, arrival,
                 departureDateTime, arrivalDateTime));
+
         List<FlightResult> flightResults = flightFinderService.findFlights(departure, arrival, departureDateTime,
                 arrivalDateTime);
+
+        if (flightResults.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
+
         return ResponseEntity.status(HttpStatus.OK).body(flightResults);
     }
 
