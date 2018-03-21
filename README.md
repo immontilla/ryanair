@@ -36,4 +36,4 @@ curl -i -X GET "http://localhost:8765/api/interconnections?departure=DUB&arrival
 ```
 
 ### Status
-**In progress**
+**Done!**
