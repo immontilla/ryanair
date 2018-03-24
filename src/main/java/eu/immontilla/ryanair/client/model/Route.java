@@ -25,7 +25,7 @@ public class Route implements Serializable {
     private String group;
 
     @JsonCreator
-    private Route(@JsonProperty("airportFrom") String airportFrom, @JsonProperty("airportTo") String airportTo,
+    public Route(@JsonProperty("airportFrom") String airportFrom, @JsonProperty("airportTo") String airportTo,
             @JsonProperty("connectingAirport") String connectingAirport, @JsonProperty("newRoute") boolean newRoute,
             @JsonProperty("seasonalRoute") boolean seasonalRoute, @JsonProperty("operator") String operator,
             @JsonProperty("group") String group) {

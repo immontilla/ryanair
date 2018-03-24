@@ -28,7 +28,7 @@ public class MainControllerTest {
     private static final String ARRIVAL = "arrival";
     private static final String DEPARTUREDATETIME = "departureDateTime";
     private static final String ARRIVALDATETIME = "arrivalDateTime";
-    private static final String ISO_DATE_TIME = "YYYY-MM-dd'T'hh:mm";
+    private static final String ISO_DATE_TIME = "YYYY-MM-dd'T'HH:mm";
     private static final String MAD = "MAD";
     private static final String LIS = "LIS";
     private static final String DUB = "DUB";
@@ -36,7 +36,7 @@ public class MainControllerTest {
 
     @Autowired
     private MockMvc mvc;
-
+    
     @MockBean
     private FlightFinderService flightFinderService;
 
@@ -69,7 +69,7 @@ public class MainControllerTest {
     }
 
     @Test
-    public void whenNotAvailableRouteThenNoContent() throws Exception {
+    public void whenServiceFindFlightsIsEmptyThenNoContent() throws Exception {
         when(flightFinderService.findFlights(DUB, CLO, LocalDateTime.parse(tomorrow),
                 LocalDateTime.parse(afterTomorrow))).thenReturn(Collections.emptyList());
         mvc.perform(get(INTERCONNECTIONS).contentType(MediaType.APPLICATION_JSON_VALUE).param(DEPARTURE, DUB)
