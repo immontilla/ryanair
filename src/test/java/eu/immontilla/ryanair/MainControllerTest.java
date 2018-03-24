@@ -1,10 +1,12 @@
-package eu.immontilla.ryanair.controller;
+package eu.immontilla.ryanair;
 
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import eu.immontilla.ryanair.controller.MainController;
 import eu.immontilla.ryanair.service.FlightFinderService;
 
 @RunWith(SpringRunner.class)
@@ -35,7 +38,7 @@ public class MainControllerTest {
     private MockMvc mvc;
 
     @MockBean
-    private FlightFinderService service;
+    private FlightFinderService flightFinderService;
 
     LocalDateTime now = LocalDateTime.now();
     String today = now.format(DateTimeFormatter.ofPattern(ISO_DATE_TIME));
@@ -46,28 +49,30 @@ public class MainControllerTest {
 
     @Test
     public void whenDepartureDateTimeIsYesterdayThenBadRequest() throws Exception {
-        this.mvc.perform(get(INTERCONNECTIONS).contentType(MediaType.APPLICATION_JSON_VALUE).param(DEPARTURE, MAD)
+        mvc.perform(get(INTERCONNECTIONS).contentType(MediaType.APPLICATION_JSON_VALUE).param(DEPARTURE, MAD)
                 .param(ARRIVAL, LIS).param(DEPARTUREDATETIME, yesterday).param(ARRIVALDATETIME, tomorrow))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void whenArrivalDateTimeIsBeforeDepartureDateTimeThenBadRequest() throws Exception {
-        this.mvc.perform(get(INTERCONNECTIONS).contentType(MediaType.APPLICATION_JSON_VALUE).param(DEPARTURE, MAD)
+        mvc.perform(get(INTERCONNECTIONS).contentType(MediaType.APPLICATION_JSON_VALUE).param(DEPARTURE, MAD)
                 .param(ARRIVAL, DUB).param(DEPARTUREDATETIME, tomorrow).param(ARRIVALDATETIME, today))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void whenArrivalDateTimeIsLessThan2HoursAfterDepartureDateTimeThenBadRequest() throws Exception {
-        this.mvc.perform(get(INTERCONNECTIONS).contentType(MediaType.APPLICATION_JSON_VALUE).param(DEPARTURE, MAD)
+        mvc.perform(get(INTERCONNECTIONS).contentType(MediaType.APPLICATION_JSON_VALUE).param(DEPARTURE, MAD)
                 .param(ARRIVAL, DUB).param(DEPARTUREDATETIME, tomorrow).param(ARRIVALDATETIME, tomorrowPlusOneHour))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void whenNotAvailableRouteThenNoContent() throws Exception {
-        this.mvc.perform(get(INTERCONNECTIONS).contentType(MediaType.APPLICATION_JSON_VALUE).param(DEPARTURE, MAD)
+        when(flightFinderService.findFlights(DUB, CLO, LocalDateTime.parse(tomorrow),
+                LocalDateTime.parse(afterTomorrow))).thenReturn(Collections.emptyList());
+        mvc.perform(get(INTERCONNECTIONS).contentType(MediaType.APPLICATION_JSON_VALUE).param(DEPARTURE, DUB)
                 .param(ARRIVAL, CLO).param(DEPARTUREDATETIME, tomorrow).param(ARRIVALDATETIME, afterTomorrow))
                 .andExpect(status().isNoContent());
     }
