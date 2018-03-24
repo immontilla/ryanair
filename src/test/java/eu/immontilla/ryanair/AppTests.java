@@ -1,4 +1,4 @@
-package eu.immontilla.ryanair.ryanair;
+package eu.immontilla.ryanair;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

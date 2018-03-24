@@ -138,7 +138,7 @@ public class NonDirectConnections {
             arrivalAirport = flightTo.getLegs().get(0).getArrivalAirport();
             arrivalAt = flightTo.getLegs().get(0).getArrivalDateTime();
             minDepartureFromStop = LocalDateTime.parse(arrivalAt).plusHours(2);
-            LOGGER.info(String.format("Looking from flights from %s to %s departing after %s ...", departureAirport,
+            LOGGER.info(String.format("Looking for flights from %s to %s departing after %s ...", departureAirport,
                     arrivalAirport, minDepartureFromStop.toString()));
             flightsFromTheStop = flightsFromTheStops.stream().filter(departFromStop(arrivalAirport))
                     .collect(Collectors.toList());
