@@ -20,7 +20,7 @@ public class DayFlight implements Serializable {
     private Collection<Flight> flights;
 
     @JsonCreator
-    private DayFlight(@JsonProperty("day") int day, @JsonProperty("flights") Collection<Flight> flights) {
+    public DayFlight(@JsonProperty("day") int day, @JsonProperty("flights") Collection<Flight> flights) {
         super();
         this.day = day;
         this.flights = flights;

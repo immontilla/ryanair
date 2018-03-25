@@ -19,7 +19,7 @@ public class Flight implements Serializable {
     private String arrivalTime;
 
     @JsonCreator
-    private Flight(@JsonProperty("number") String number, @JsonProperty("departureTime") String departureTime,
+    public Flight(@JsonProperty("number") String number, @JsonProperty("departureTime") String departureTime,
             @JsonProperty("arrivalTime") String arrivalTime) {
         super();
         this.number = number;
