@@ -1,6 +1,7 @@
 package eu.immontilla.ryanair;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,7 @@ import eu.immontilla.ryanair.client.model.Schedule;
 import eu.immontilla.ryanair.client.service.AvailableRouteService;
 import eu.immontilla.ryanair.client.service.ScheduleFinderService;
 import eu.immontilla.ryanair.model.FlightResult;
+import eu.immontilla.ryanair.model.Leg;
 import eu.immontilla.ryanair.service.FlightFinderService;
 import eu.immontilla.ryanair.service.impl.FlightFinderServiceImpl;
 
@@ -199,6 +201,27 @@ public class FlightFinderServiceImplTest {
         Mockito.when(scheduleFinderService.get(DUB, LIS, month, year)).thenReturn(scheduleDUBLIS);
         List<FlightResult> flightResults = flightFinderService.findFlights(MAD, LIS, tomorrow, afterTomorrow);
         assertEquals(flightResults.get(0).getStops(), 1);
+    }
+
+    @Test
+    public void modelFlightResultLegLogTest() {
+        List<Leg> legs = new ArrayList<Leg>();
+        Leg legOne = new Leg();
+        legOne.setDepartureAirport(MAD);
+        legOne.setArrivalAirport(DUB);
+        legOne.setDepartureDateTime(now.toString());
+        legOne.setArrivalDateTime(tomorrow.toString());
+        legs.add(legOne);
+        Leg legTwo = new Leg();
+        legTwo.setDepartureAirport(MAD);
+        legTwo.setArrivalAirport(DUB);
+        legTwo.setDepartureDateTime(now.toString());
+        legTwo.setArrivalDateTime(tomorrow.toString());
+        legs.add(legTwo);
+        FlightResult flightResult = new FlightResult(1, legs);
+        assertNotNull(legOne.toString());
+        assertNotNull(legTwo.toString());
+        assertNotNull(flightResult.toString());
     }
 
 }
