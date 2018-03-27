@@ -41,7 +41,7 @@ public class FlightFinderServiceImplTest {
     private static final String ONLY_HOUR_AND_MINUTE = "HH:mm";
 
     @TestConfiguration
-    static class EmployeeServiceImplTestContextConfiguration {
+    static class FlightFinderServiceImplTestContextConfiguration {
         @Bean
         public FlightFinderService flightFinderService() {
             return new FlightFinderServiceImpl();
@@ -198,7 +198,7 @@ public class FlightFinderServiceImplTest {
         Schedule scheduleDUBLIS = new Schedule(month, days);
         Mockito.when(scheduleFinderService.get(DUB, LIS, month, year)).thenReturn(scheduleDUBLIS);
         List<FlightResult> flightResults = flightFinderService.findFlights(MAD, LIS, tomorrow, afterTomorrow);
-        assertTrue(flightResults.isEmpty());
+        assertEquals(flightResults.get(0).getStops(), 1);
     }
 
 }
