@@ -2,13 +2,12 @@
 <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.ehcache.org/ehcache.xsd"
    updateCheck="true" monitoring="autodetect" dynamicConfig="true">
    <diskStore path="java.io.tmpdir" />
-   <cache name="routesCache" 
+   <cache name="clientAPICache" 
       maxEntriesLocalHeap="10000" 
       maxEntriesLocalDisk="1000" 
       eternal="false"
       diskSpoolBufferSizeMB="20" 
-      timeToIdleSeconds="300" 
-      timeToLiveSeconds="600" 
+      timeToIdleSeconds="60"  
       memoryStoreEvictionPolicy="LFU"
       transactionalMode="off">
       <persistence strategy="localTempSwap" />

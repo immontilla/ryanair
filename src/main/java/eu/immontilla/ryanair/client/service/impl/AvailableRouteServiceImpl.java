@@ -25,7 +25,7 @@ import eu.immontilla.ryanair.client.model.Route;
 import eu.immontilla.ryanair.client.service.AvailableRouteService;
 
 @Service
-@CacheConfig(cacheNames = "routesCache")
+@CacheConfig(cacheNames = "clientAPICache")
 public class AvailableRouteServiceImpl implements AvailableRouteService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AvailableRouteServiceImpl.class);
 
