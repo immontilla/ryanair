@@ -189,7 +189,7 @@ public class FlightFinderServiceImplTest {
         Mockito.when(scheduleFinderService.get(MAD, DUB, month, year)).thenReturn(scheduleMADDUB);
         days = new ArrayList<DayFlight>();
         flights = new ArrayList<Flight>();
-        LocalDateTime connection = tomorrow.plusHours(5);
+        LocalDateTime connection = tomorrow.plusHours(7);
         day = connection.getDayOfMonth();
         month = connection.getMonthValue();
         year = connection.getYear();
